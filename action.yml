@@ -35,6 +35,7 @@ runs:
       id: launch_task
       shell: bash
       run: |
+        echo "$CLEARML_QUEUE"
         echo "TASK_ID=$(
           clearml-task --project 'Github CICD Video' --name cicd_test --branch ${{ github.head_ref }} --script task.py --requirements requirements.txt --skip-task-init --queue '$CLEARML_QUEUE' | rg -o 'Task id=(.*) sent' -r '$1'
         )" >> $GITHUB_OUTPUT
