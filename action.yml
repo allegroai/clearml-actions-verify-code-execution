@@ -46,6 +46,7 @@ runs:
         CLEARML_TIMEOUT: ${{ inputs.CLEARML_TIMEOUT }}
         CLEARML_QUEUE: ${{ inputs.CLEARML_QUEUE }}
     - name: Poll for task progress
+      shell: bash
       run: python ${{ github.action_path }}/check_clearml_task_running.py "${{ steps.launch_task.outputs.TASK_ID }}"
       env:
         CLEARML_API_ACCESS_KEY: ${{ inputs.CLEARML_API_ACCESS_KEY }}
