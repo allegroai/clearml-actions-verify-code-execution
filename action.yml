@@ -1,0 +1,48 @@
+# action.yml
+name: 'ClearML check remotely runnable'
+description: 'Launch the current PR as a remote task and poll status. Clean up when iterations are detected.'
+inputs:
+  CLEARML_API_ACCESS_KEY:
+    description: 'ClearML api access key (can be generated in your profile page)'
+    required: true
+  CLEARML_API_SECRET_KEY:
+    description: 'ClearML api secret key (can be generated in your profile page)'
+    required: true
+  CLEARML_API_HOST:
+    description: 'ClearML server api host'
+    required: true
+  CLEARML_TIMEOUT:
+    description: 'How long to wait for the first iteration before failing, not including time waiting in queue, in seconds. Note: this does include docker setup and package installations! (default: 600)'
+    default: 600
+  CLEARML_QUEUE:
+    description: 'Name of the queue to place the experiment into. (default: "default")'
+    default: "default"
+runs:
+  env:
+    CLEARML_API_ACCESS_KEY: ${{ inputs.CLEARML_API_ACCESS_KEY }}
+    CLEARML_API_SECRET_KEY: ${{ inputs.CLEARML_API_SECRET_KEY }}
+    CLEARML_API_HOST: ${{ inputs.CLEARML_API_HOST }}
+    CLEARML_TIMEOUT: ${{ inputs.CLEARML_TIMEOUT }}
+    CLEARML_QUEUE: ${{ inputs.CLEARML_QUEUE }}
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    - name: Install ClearML
+      shell: bash
+      run: |
+        pip install -r ${{ github.action_path }}/requirements.txt
+        sudo apt-get update && sudo apt-get install -y ripgrep
+    - name: Start the task
+      id: launch_task
+      shell: bash
+      run: |
+        echo "TASK_ID=$(
+          clearml-task --project 'Github CICD Video' --name cicd_test --branch ${{ github.head_ref }} --script task.py --requirements requirements.txt --skip-task-init --queue default | rg -o 'Task id=(.*) sent' -r '$1'
+        )" >> $GITHUB_OUTPUT
+    - name: Poll for task progress
+      run: python ${{ github.action_path }}/check_clearml_task_running.py "${{ steps.launch_task.outputs.TASK_ID }}"
