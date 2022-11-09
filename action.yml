@@ -42,7 +42,7 @@ runs:
       shell: bash
       run: |
         echo "TASK_ID=$(
-          clearml-task --project 'Github CICD Video' --name cicd_test --branch ${{ github.head_ref }} --script task.py --requirements requirements.txt --skip-task-init --queue default | rg -o 'Task id=(.*) sent' -r '$1'
+          clearml-task --project 'Github CICD Video' --name cicd_test --branch ${{ github.head_ref }} --script task.py --requirements requirements.txt --skip-task-init --queue $CLEARML_QUEUE | rg -o 'Task id=(.*) sent' -r '$1'
         )" >> $GITHUB_OUTPUT
     - name: Poll for task progress
       run: python ${{ github.action_path }}/check_clearml_task_running.py "${{ steps.launch_task.outputs.TASK_ID }}"

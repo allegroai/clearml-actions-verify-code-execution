@@ -1,9 +1,10 @@
+import os
 import sys
 import time
 from clearml import Task
 
 
-def check_task_status(task_id, timeout=600):
+def check_task_status(task_id, timeout):
     """Make sure the task can run by checking for iteration reports."""
     # Get the task object
     task = Task.get_task(task_id=task_id)
@@ -32,4 +33,4 @@ def check_task_status(task_id, timeout=600):
 
 
 if __name__ == '__main__':
-    check_task_status(sys.argv[1])
+    check_task_status(sys.argv[1], os.getenv('CLEARML_TIMEOUT'))
