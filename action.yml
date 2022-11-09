@@ -36,7 +36,7 @@ runs:
       shell: bash
       run: |
         echo "TASK_ID=$(
-          clearml-task --project 'Github CICD Video' --name cicd_test --branch ${{ github.head_ref }} --script task.py --requirements requirements.txt --skip-task-init --queue $CLEARML_QUEUE | rg -o 'Task id=(.*) sent' -r '$1'
+          clearml-task --project 'Github CICD Video' --name cicd_test --branch ${{ github.head_ref }} --script task.py --requirements requirements.txt --skip-task-init --queue '$CLEARML_QUEUE' | rg -o 'Task id=(.*) sent' -r '$1'
         )" >> $GITHUB_OUTPUT
       # There seems to be a bug in Github actions that doesn't allow me to use runs.env for everything...
       env:
