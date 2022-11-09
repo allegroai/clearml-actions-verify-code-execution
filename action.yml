@@ -17,6 +17,12 @@ inputs:
   CLEARML_QUEUE:
     description: 'Name of the queue to place the experiment into. (default: "default")'
     default: "default"
+  CLEARML_PROJECT:
+    description: 'Project name to run the test task into. (default: "Github CICD")'
+    default: 'Github CICD'
+  CLEARML_TASK_NAME:
+    description: 'Task name to run the test task as. (default: "cicd_test_task")'
+    default: 'cicd_test_task'
 runs:
   using: 'composite'
   steps:
@@ -37,15 +43,16 @@ runs:
       run: |
         echo "$CLEARML_QUEUE"
         echo "TASK_ID=$(
-          clearml-task --project 'Github CICD Video' --name cicd_test --branch ${{ github.head_ref }} --script task.py --requirements requirements.txt --skip-task-init --queue '$CLEARML_QUEUE' | rg -o 'Task id=(.*) sent' -r '$1'
+          clearml-task --project '$CLEARML_PROJECT' --name '$CLEARML_TASK_NAME' --branch ${{ github.head_ref }} --script task.py --requirements requirements.txt --skip-task-init --queue '$CLEARML_QUEUE' | rg -o 'Task id=(.*) sent' -r '$1'
         )" >> $GITHUB_OUTPUT
       # There seems to be a bug in Github actions that doesn't allow me to use runs.env for everything...
       env:
         CLEARML_API_ACCESS_KEY: ${{ inputs.CLEARML_API_ACCESS_KEY }}
         CLEARML_API_SECRET_KEY: ${{ inputs.CLEARML_API_SECRET_KEY }}
         CLEARML_API_HOST: ${{ inputs.CLEARML_API_HOST }}
-        CLEARML_TIMEOUT: ${{ inputs.CLEARML_TIMEOUT }}
         CLEARML_QUEUE: ${{ inputs.CLEARML_QUEUE }}
+        CLEARML_PROJECT: ${{ inputs.CLEARML_PROJECT }}
+        CLEARML_TASK_NAME: ${{ inputs.CLEARML_TASK_NAME }}
     - name: Poll for task progress
       shell: bash
       run: python ${{ github.action_path }}/check_clearml_task_running.py "${{ steps.launch_task.outputs.TASK_ID }}"
@@ -54,4 +61,3 @@ runs:
         CLEARML_API_SECRET_KEY: ${{ inputs.CLEARML_API_SECRET_KEY }}
         CLEARML_API_HOST: ${{ inputs.CLEARML_API_HOST }}
         CLEARML_TIMEOUT: ${{ inputs.CLEARML_TIMEOUT }}
-        CLEARML_QUEUE: ${{ inputs.CLEARML_QUEUE }}
