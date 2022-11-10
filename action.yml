@@ -14,7 +14,7 @@ inputs:
   CLEARML_TIMEOUT:
     description: 'How long to wait for the first iteration before failing, not including time waiting in queue, in seconds. Note: this does include docker setup and package installations! (default: 600)'
     default: 600
-  CLEARML_QUEUE:
+  CLEARML_AGENT_QUEUE:
     description: 'Name of the queue to place the experiment into. (default: "default")'
     default: "default"
   CLEARML_PROJECT:
@@ -23,6 +23,18 @@ inputs:
   CLEARML_TASK_NAME:
     description: 'Task name to run the test task as. (default: "cicd_test_task")'
     default: 'cicd_test_task'
+  CLEARML_AGENT_ENTRYPOINT:
+    description: 'Entry point script for the remote execution. (default: "main.py")'
+    default: 'main.py'
+  CLEARML_AGENT_FOLDER:
+    description: 'Execute the code from a local folder. (default: ".")'
+    default: '.'
+  CLEARML_AGENT_REQUIREMENTS:
+    description: 'Pip requirements file. (default: "requirements.txt")'
+    default: 'requirements.txt'
+  CLEARML_AGENT_ARGS:
+    description: 'Arguments to pass to the remote task, list of <argument>=<value> strings. (default: [])'
+    default: []
 runs:
   using: 'composite'
   steps:
@@ -41,18 +53,30 @@ runs:
       id: launch_task
       shell: bash
       run: |
-        echo "$CLEARML_QUEUE"
+        echo "$CLEARML_AGENT_QUEUE"
         echo "TASK_ID=$(
-          clearml-task --project '${{ env.CLEARML_PROJECT }}' --name '${{ env.CLEARML_TASK_NAME }}' --branch ${{ github.head_ref }} --script task.py --requirements requirements.txt --skip-task-init --queue '${{ env.CLEARML_QUEUE }}' | rg -o 'Task id=(.*) sent' -r '$1'
+          clearml-task --project '${{ env.CLEARML_PROJECT }}' \
+            --name '${{ env.CLEARML_TASK_NAME }}' \
+            --branch ${{ github.head_ref }} \
+            --script '${{ env.CLEARML_AGENT_ENTRYPOINT }}' \
+            --folder '${{ env.CLEARML_AGENT_FOLDER }}' \
+            --requirements '${{ env.CLEARML_AGENT_REQUIREMENTS }}' \
+            --args '${{ env.CLEARML_AGENT_ARGS }}' \
+            --skip-task-init \
+            --queue '${{ env.CLEARML_AGENT_QUEUE }}' | rg -o 'Task id=(.*) sent' -r '$1'
         )" >> $GITHUB_OUTPUT
       # There seems to be a bug in Github actions that doesn't allow me to use runs.env for everything...
       env:
         CLEARML_API_ACCESS_KEY: ${{ inputs.CLEARML_API_ACCESS_KEY }}
         CLEARML_API_SECRET_KEY: ${{ inputs.CLEARML_API_SECRET_KEY }}
         CLEARML_API_HOST: ${{ inputs.CLEARML_API_HOST }}
-        CLEARML_QUEUE: ${{ inputs.CLEARML_QUEUE }}
+        CLEARML_AGENT_QUEUE: ${{ inputs.CLEARML_AGENT_QUEUE }}
         CLEARML_PROJECT: ${{ inputs.CLEARML_PROJECT }}
         CLEARML_TASK_NAME: ${{ inputs.CLEARML_TASK_NAME }}
+        CLEARML_AGENT_ENTRYPOINT: ${{ inputs.CLEARML_AGENT_ENTRYPOINT }}
+        CLEARML_AGENT_FOLDER: ${{ inputs.CLEARML_AGENT_FOLDER }}
+        CLEARML_AGENT_REQUIREMENTS: ${{ inputs.CLEARML_AGENT_REQUIREMENTS }}
+        CLEARML_AGENT_ARGS: ${{ inputs.CLEARML_AGENT_ARGS }}
     - name: Poll for task progress
       shell: bash
       run: python ${{ github.action_path }}/check_clearml_task_running.py "${{ steps.launch_task.outputs.TASK_ID }}"
