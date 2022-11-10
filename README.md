@@ -24,9 +24,7 @@ jobs:
             CLEARML_TIMEOUT: 600
             CLEARML_AGENT_QUEUE: 'GPU Queue'
             CLEARML_AGENT_ENTRYPOINT: 'task.py'
-            CLEARML_AGENT_ARGS:
-              - arg1=foo
-              - arg2=bar
+            CLEARML_AGENT_ARGS: 'arg1=foo arg2=bar'
 ```
 
 ## Inputs
@@ -39,4 +37,4 @@ jobs:
 6. `CLEARML_AGENT_ENTRYPOINT`: Entry point script for the remote execution. (default: "main.py")
 7. `CLEARML_AGENT_FOLDER`: Execute the code from a local folder. (default: ".")
 8. `CLEARML_AGENT_REQUIREMENTS`: Pip requirements file. (default: "requirements.txt")
-9. `CLEARML_AGENT_ARGS`: Arguments to pass to the remote task, list of <argument>=<value> strings. (default: [])
+9. `CLEARML_AGENT_ARGS`: Arguments to pass to the remote task, list of <argument>=<value> strings. (default: '')
