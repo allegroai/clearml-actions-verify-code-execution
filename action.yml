@@ -34,7 +34,7 @@ inputs:
     default: 'requirements.txt'
   CLEARML_AGENT_ARGS:
     description: 'Arguments to pass to the remote task, list of <argument>=<value> strings. (default: [])'
-    default: ''
+    default: 'hack=empty_string_doesnt_work'
 runs:
   using: 'composite'
   steps:
