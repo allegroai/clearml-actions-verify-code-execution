@@ -33,4 +33,4 @@ def check_task_status(task_id, timeout):
 
 
 if __name__ == '__main__':
-    check_task_status(sys.argv[1], int(os.getenv('CLEARML_TIMEOUT')))
+    check_task_status(sys.argv[1], int(os.getenv('EXECUTION_TIMEOUT')))
