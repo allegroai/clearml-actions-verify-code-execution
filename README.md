@@ -19,7 +19,7 @@ The general flow of the action is as follows:
 ## Example usage
 
 ```yaml
-name: Check remotely runnable
+name: Verify code execution
 on:
   pull_request:
     branches: [ main ]
