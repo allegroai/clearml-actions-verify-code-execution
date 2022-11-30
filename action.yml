@@ -1,5 +1,5 @@
 # action.yml
-name: 'ClearML check remotely runnable'
+name: 'ClearML verify code execution'
 description: 'Launch the current PR as a remote task and poll status. Clean up when iterations are detected.'
 inputs:
   CLEARML_API_ACCESS_KEY:
